@@ -1,0 +1,2 @@
+# HQBot
+Two bots that can receive a screenshot of a given HQ or CashShow question, and return answers with their respective probabilities of being correct, given the amount of occurrences in the first 10 google search results. Google Cloud Natural Language API and Google Cloud Optical Character Recognition API both used. Answers are subject to being incorrect, and should not be used on a live game, only for research purposes, as it violates the HQ and CashShow terms of service. 
