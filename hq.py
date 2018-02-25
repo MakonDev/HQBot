@@ -79,7 +79,8 @@ def google_search(search_term, api_key, cse_id, **kwargs):
 def compute(question, answer1, answer2, answer3):
     my_api_key = "AIzaSyAq13qg7qzUEtRYMyt-zihs1f1KGadh6-k"
     my_cse_id = "011985618827618215433:031zfpitbiq"
-    boolean_q = question+" OR "+answer1+" OR "+answer2+" OR "+answer3
+    #boolean_q = question+" OR "+answer1+" OR "+answer2+" OR "+answer3
+    boolean_q = question
     print(boolean_q)
     results = google_search(
         boolean_q, my_api_key, my_cse_id, num=10, filter="1")
@@ -91,7 +92,7 @@ def compute(question, answer1, answer2, answer3):
 
     i=0
     for result in results:
-        if i<3:
+        if i<8:
             r = requests.get(result['link'])
             if answer1.lower() in r.text.lower():
                 ans1_hits+=1
@@ -102,15 +103,16 @@ def compute(question, answer1, answer2, answer3):
             if answer3.lower() in r.text.lower():
                 ans3_hits+=1
                 total_hits+=1
-        if answer1.lower() in result['snippet'].lower():
-            ans1_hits+=1
-            total_hits+=1
-        if answer2.lower() in result['snippet'].lower():
-            ans2_hits+=1
-            total_hits+=1
-        if answer3.lower() in result['snippet'].lower():
-            ans3_hits+=1
-            total_hits+=1
+        else:
+            if answer1.lower() in result['snippet'].lower():
+                ans1_hits+=1
+                total_hits+=1
+            if answer2.lower() in result['snippet'].lower():
+                ans2_hits+=1
+                total_hits+=1
+            if answer3.lower() in result['snippet'].lower():
+                ans3_hits+=1
+                total_hits+=1
         i+=1
 
     #Compute probabilities for each answer based on occurences as a proportion of total hits for all answers
@@ -129,9 +131,19 @@ def compute(question, answer1, answer2, answer3):
         print("Probability " + answer1 + " is correct: ", str(a1_p*100) + "%")
         print("Probability " + answer2 + " is correct: ", str(a2_p*100) + "%")    
         print("Probability " + answer3 + " is correct: ", str(a3_p*100) + "%")
+        if (a1_p != 0 and a2_p != 0) or (a1_p != 0 and a3_p != 0) or (a2_p != 0 and a3_p != 0):
+            if a1_p == a2_p or a1_p == a3_p or a2_p == a3_p:
+                print("Taking a final shot...")
+                last_shot(question, answer1, answer2, answer3)
     else:
         print("No hits...good luck!")
+        print("Taking a final shot...")
+        last_shot(question, answer1, answer2, answer3)
+        return
         
+def last_shot(question, answer1, answer2, answer3):
+    my_api_key = "AIzaSyAq13qg7qzUEtRYMyt-zihs1f1KGadh6-k"
+    my_cse_id = "011985618827618215433:031zfpitbiq"
     service = build("language", "v1")
     service_request = service.documents().analyzeEntities(
         body={
@@ -156,9 +168,10 @@ def compute(question, answer1, answer2, answer3):
     ans2_hits1 = 0
     ans3_hits1 = 0
 
-    i=0
+    #i=0
     for result in results:
         #pprint.pprint(result)
+        '''
         if i<3:
             r1 = requests.get(result['link'])
             if answer1.lower() in r1.text.lower():
@@ -170,9 +183,10 @@ def compute(question, answer1, answer2, answer3):
             if answer3.lower() in r1.text.lower():
                 ans3_hits1+=1
                 total_hits1+=1
+        '''
         if answer1.lower() in result['snippet'].lower():
             ans1_hits1+=1
-            total_hits+=1
+            total_hits1+=1
         if answer2.lower() in result['snippet'].lower():
             ans2_hits1+=1
             total_hits1+=1
@@ -184,7 +198,7 @@ def compute(question, answer1, answer2, answer3):
     #Compute probabilities for each answer based on occurences as a proportion of total hits for all answers
     if total_hits1 != 0:
         if "not".lower() in question.lower():
-            print("Not detected")
+            print("'Not' detected")
             a1_p1 = 1-(ans1_hits1/total_hits1)
             a2_p1 = 1-(ans2_hits1/total_hits1)
             a3_p1 = 1-(ans3_hits1/total_hits1)
@@ -199,3 +213,4 @@ def compute(question, answer1, answer2, answer3):
         print("Probability " + answer3 + " is correct: ", str(a3_p1*100) + "%")
     else:
         print("No hits...good luck!")
+    return
