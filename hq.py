@@ -79,7 +79,6 @@ def google_search(search_term, api_key, cse_id, **kwargs):
 def compute(question, answer1, answer2, answer3):
     my_api_key = "AIzaSyAq13qg7qzUEtRYMyt-zihs1f1KGadh6-k"
     my_cse_id = "011985618827618215433:031zfpitbiq"
-    #boolean_q = question+" OR "+answer1+" OR "+answer2+" OR "+answer3
     boolean_q = question
     print(boolean_q)
     results = google_search(
@@ -89,31 +88,45 @@ def compute(question, answer1, answer2, answer3):
     ans1_hits = 0
     ans2_hits = 0
     ans3_hits = 0
-
+    
     i=0
     for result in results:
-        if i<8:
-            r = requests.get(result['link'])
-            if answer1.lower() in r.text.lower():
+        local1 = 0
+        local2 = 0
+        local3 = 0
+        snippet = result['snippet'].lower().replace("...", " ")
+        for line in snippet.split("."):
+            if answer1.lower() in line:
                 ans1_hits+=1
+                local1+=1
                 total_hits+=1
-            if answer2.lower() in r.text.lower():
+            if answer2.lower() in line:
                 ans2_hits+=1
+                local2+=2
                 total_hits+=1
-            if answer3.lower() in r.text.lower():
+            if answer3.lower() in line:
                 ans3_hits+=1
-                total_hits+=1
-        else:
-            if answer1.lower() in result['snippet'].lower():
-                ans1_hits+=1
-                total_hits+=1
-            if answer2.lower() in result['snippet'].lower():
-                ans2_hits+=1
-                total_hits+=1
-            if answer3.lower() in result['snippet'].lower():
-                ans3_hits+=1
+                local3+=1
                 total_hits+=1
         i+=1
+        if local1 == 0 and local2 == 0 and local3 == 0:
+            print("No hits")
+        else:
+            if local1 == local2 and local1!=0:
+                print(answer1+ " AND "+answer2)
+            elif local2 == local3 and local2!=0:
+                print(answer2+ " AND "+answer3)
+            elif local1 == local3 and local1!=0:
+                print(answer1+ " AND "+answer3)
+            elif local1 == local2 and local2 == local3 and local1!=0:
+                print("3 way tie")
+            else:
+                if local1>local2 and local1>local3:
+                    print(answer1)
+                elif local2>local3 and local2>local1:
+                    print(answer2)
+                elif local3>local2 and local3>local1:
+                    print(answer3)
 
     #Compute probabilities for each answer based on occurences as a proportion of total hits for all answers
     if total_hits != 0:
@@ -193,7 +206,7 @@ def last_shot(question, answer1, answer2, answer3):
         if answer3.lower() in result['snippet'].lower():
             ans3_hits1+=1
             total_hits1+=1
-        i+=1
+        #i+=1
 
     #Compute probabilities for each answer based on occurences as a proportion of total hits for all answers
     if total_hits1 != 0:

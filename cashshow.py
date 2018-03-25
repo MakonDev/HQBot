@@ -97,31 +97,45 @@ def compute(question, answer1, answer2, answer3):
     ans1_hits = 0
     ans2_hits = 0
     ans3_hits = 0
-
+    
     i=0
     for result in results:
-        if i<4:
-            r = requests.get(result['link'])
-            if answer1.lower() in r.text.lower():
+        local1 = 0
+        local2 = 0
+        local3 = 0
+        snippet = result['snippet'].lower().replace("...", " ")
+        for line in snippet.split("."):
+            if answer1.lower() in line:
                 ans1_hits+=1
+                local1+=1
                 total_hits+=1
-            if answer2.lower() in r.text.lower():
+            if answer2.lower() in line:
                 ans2_hits+=1
+                local2+=2
                 total_hits+=1
-            if answer3.lower() in r.text.lower():
+            if answer3.lower() in line:
                 ans3_hits+=1
-                total_hits+=1
-        else:
-            if answer1.lower() in result['snippet'].lower():
-                ans1_hits+=1
-                total_hits+=1
-            if answer2.lower() in result['snippet'].lower():
-                ans2_hits+=1
-                total_hits+=1
-            if answer3.lower() in result['snippet'].lower():
-                ans3_hits+=1
+                local3+=1
                 total_hits+=1
         i+=1
+        if local1 == 0 and local2 == 0 and local3 == 0:
+            print("No hits")
+        else:
+            if local1 == local2 and local1!=0:
+                print(answer1+ " AND "+answer2)
+            elif local2 == local3 and local2!=0:
+                print(answer2+ " AND "+answer3)
+            elif local1 == local3 and local1!=0:
+                print(answer1+ " AND "+answer3)
+            elif local1 == local2 and local2 == local3 and local1!=0:
+                print("3 way tie")
+            else:
+                if local1>local2 and local1>local3:
+                    print(answer1)
+                elif local2>local3 and local2>local1:
+                    print(answer2)
+                elif local3>local2 and local3>local1:
+                    print(answer3)
     #Compute probabilities for each answer based on occurences as a proportion of total hits for all answers
     if total_hits != 0:
         if "not".lower() in question.lower():
@@ -135,9 +149,9 @@ def compute(question, answer1, answer2, answer3):
             a3_p = (ans3_hits/total_hits)
 
         #print probabilities for each
-        print("Probability " + answer1 + " is correct: ", str(a1_p*100) + "%")
-        print("Probability " + answer2 + " is correct: ", str(a2_p*100) + "%")    
-        print("Probability " + answer3 + " is correct: ", str(a3_p*100) + "%")
+        print(answer1 , str(a1_p*100) + "%")
+        print(answer2, str(a2_p*100) + "%")    
+        print(answer3, str(a3_p*100) + "%")
         if (a1_p != 0 and a2_p != 0) or (a1_p != 0 and a3_p != 0) or (a2_p != 0 and a3_p != 0):
             if a1_p == a2_p or a1_p == a3_p or a2_p == a3_p:
                 print("Taking a final shot...")
