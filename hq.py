@@ -77,8 +77,8 @@ def google_search(search_term, api_key, cse_id, **kwargs):
     return res['items']
 
 def compute(question, answer1, answer2, answer3):
-    my_api_key = "AIzaSyAq13qg7qzUEtRYMyt-zihs1f1KGadh6-k"
-    my_cse_id = "011985618827618215433:031zfpitbiq"
+    my_api_key = "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+    my_cse_id = "xxxxxxxxxxxxxxxxxxxxxxxxxx"
     boolean_q = question
     print(boolean_q)
     results = google_search(
@@ -155,8 +155,8 @@ def compute(question, answer1, answer2, answer3):
         return
         
 def last_shot(question, answer1, answer2, answer3):
-    my_api_key = "AIzaSyAq13qg7qzUEtRYMyt-zihs1f1KGadh6-k"
-    my_cse_id = "011985618827618215433:031zfpitbiq"
+    my_api_key = "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+    my_cse_id = "xxxxxxxxxxxxxxxxxxxxxxxxxx"
     service = build("language", "v1")
     service_request = service.documents().analyzeEntities(
         body={
